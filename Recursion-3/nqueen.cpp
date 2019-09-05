@@ -59,5 +59,6 @@ int main(){
 	int board[10][10]={0};
 
 	cin>>n;
+	cout<<nqueen(board,0,n)<<endl;;
 
 }
