@@ -1,8 +1,6 @@
 #include<iostream>
 #include<cmath>
 #include<queue>
-#include<vector>
-#include<map>
 using namespace std;
 
 
@@ -183,156 +181,175 @@ void levelOrder(Node*root){
 		}
 	}
 }
-
-void root2Leaf(Node*root,vector<int> &v){
-	//Base Case
+Node* insertInBST(Node*root,int d){
 	if(root==NULL){
-		return;
+		root = new Node(d);
+		return root;
 	}
-	//Leaf Node
-	if(root->left==NULL and root->right==NULL){
-		v.push_back(root->data);
-		for(int i=0;i<v.size();i++){
-			cout<<v[i]<<",";
-		}
-		cout<<endl;
-		v.pop_back();
-		return;
+	//otherwise
+	if(d<root->data){
+		root->left = insertInBST(root->left,d);
 	}
-	//Non Leaf Node
-	v.push_back(root->data);
-	root2Leaf(root->left,v);
-	root2Leaf(root->right,v);
-	//Backtracking
-	v.pop_back();	
-	return;
-}
-
-void verticalOrderPrint(Node*root,int d,map<int,vector<int> > m){
-	//base case
-	if(root==NULL){
-		return;
-	}
-	m[d].push_back(root->data);
-	verticalOrderPrint(root->left,d-1,m);
-	verticalOrderPrint(root->right,d+1,m);
-	return;
-}
-
-Node* levelInputToTree(){
-	int data;
-	cin>>data;
-	Node*root = new Node(data);
-	queue<Node*> q;
-	q.push(root);
-
-	while(!q.empty()){
-		Node*f = q.front();
-		q.pop();
-
-		int c1,c2;
-		cin>>c1>>c2;
-
-		if(c1!=-1){
-			f->left = new Node(c1);
-			q.push(f->left);
-		}
-		if(c2!=-1){
-			f->right = new Node(c2);
-			q.push(f->right);
-		}
+	else{
+		root->right = insertInBST(root->right,d);
 	}
 	return root;
 }
 
-int printAtKDist(Node*root,int target_data,int k){
-	//Leaf Node
-	if(root==NULL){
-		return -1;
-	}
 
-	if(root->data==target_data){
-		printAtLevelK(root,k);
-		return 0;
+Node* buildTree(){
+	Node* root = NULL;
+	int d;
+	cin>>d;
+	while(d!=-1){
+		root = insertInBST(root,d);
+		cin>>d;
 	}
-	//Search for the Node in the Left Substree
-	int l = printAtKDist(root->left,target_data,k);
-	if(l!=-1){
-		int d = l;
-		if(d+1==k){
-			cout<<root->data<<" ";
-		}
-		else{
-			printAtLevelK(root->right,k-d-2);
-		}
-		return d+1;
-	}
-	int r = printAtKDist(root->left,target_data,k);
-	else if(r!=-1){
-		int d = r;
-		if(d+1==k){
-			cout<<root->data<<" ";
-		}
-		else{
-			printAtLevelK(root->left,k-d-2);
-		}
-		return d+1;
-	}
-	return -1;
+	return root;
 }
 
-class Pair{
-public:
-	int inc;
-	int exc;
-
-	Pair(){
-		inc = exc = 0;
+Node*arr2bst(int a[],int s,int e){
+	//Base Case
+	if(s>e){
+		return NULL;
 	}
+	int mid = (s+e)/2;
+	Node*root = new Node(a[mid]);
+	root->left = arr2bst(a,s,mid-1);
+	root->right = arr2bst(a,mid+1,e);
+	return root;
 }
 
-Pair maxSumSubset(Node*root){
+bool search(Node*root,int key){
 	//base case
-	Pair p;
 	if(root==NULL){
-		return p;
+		return false;
 	}
-	//rec case
-	Pair L = maxSumSubset(root->left);
-	Pair R = maxSumSubset(root->right);
-
-	p.inc = root->data + L.exc + R.exc;
-	p.exc = max(L.inc,L.exc) + max(R.inc,R.exc);
-	return p;
+	if(root->data==key){
+		return true;
+	}
+	if(key<root->data){
+		return search(root->left,key);
+	}
+	return search(root->right,key);
 }
 
+class LL{
+	public: 
+		Node*head;
+		Node*tail;
+};
+
+LL tree2LL(Node*root){
+	
+	LL l;
+	if(root==NULL){
+		l.head = l.tail = NULL;
+		return l;
+	}
+	if(root->left==NULL and root->right==NULL){
+		l.head = l.tail = root;
+	}
+	else if(root->left!=NULL and root->right==NULL){
+		LL leftLL = tree2LL(root->left);
+		leftLL.tail->right = root;
+		l.head = leftLL.head;
+		l.tail = root;
+	}
+	else if(root->left==NULL and root->right!=NULL){
+		LL rightLL = tree2LL(root->right);
+		root->right = rightLL.head;
+		l.head = root;
+		l.tail = rightLL.tail;
+	}
+	else{
+		LL leftLL = tree2LL(root->left);
+		LL rightLL = tree2LL(root->right);
+		leftLL.tail->right = root;
+		root->right = rightLL.head;
+		l.head = leftLL.head;
+		l.tail = rightLL.tail;
+	}
+	return l;
+
+}
+
+
+
+Node* removeNode(Node*root,int key){
+	if(root==NULL){
+		return NULL;
+	}
+	if(root->data==key){
+		//This is the node to be deleted
+		//3 cases - 0 , 1, 2 children
+		//1. leaf node 
+		if(root->left ==NULL and root->right==NULL){
+			delete root;
+			return NULL;
+		}
+		else if(root->left!=NULL and root->right==NULL){
+			Node*temp = root->left;
+			delete root;
+			return temp;
+		}
+		else if(root->right!=NULL and root->left==NULL){
+			Node*temp = root->right;
+			delete root;
+			return temp;
+		}
+		else{
+			//find inorder successor
+			Node*temp = root->right;
+			while(temp->left!=NULL){
+				temp = temp->left;
+			}
+			//copy the temp data to root
+			root->data = temp->data;
+			//rec delete the temp->data from right subtree
+			root->right = removeNode(root->right,temp->data);
+			return root;
+		}
+
+	}
+	else if(key<root->data){
+		root->left = removeNode(root->left,key);
+	}
+	else{
+		root->right = removeNode(root->right,key);
+	}
+	return root;
+
+
+
+
+
+}
 
 
 int main(){
+
+
 	Node* root = NULL;
-	root = buildTree(root);
-	printLevelWise(root);
+	//root = buildTree();
+	//levelOrder(root);
+	int arr[] = {1,2,3,4,5,6,7};
+	int n = sizeof(arr)/sizeof(int);
 
-	vector<int> v;
-	root2Leaf(root,v);
-
-	//Hashmap
-	map<int,vector<int> > m;
-
-	verticalOrderPrint(root,0,m);
-
-	//Iterate over all keys of hashmap from min to max
-	for(auto p:m){
-		int key = p.first;
-
-		cout<<key<<"->";
-		for(auto element:p.second){
-			cout<<element<<",";
-		}
-		cout<<endl;
+	root = arr2bst(arr,0,n-1);
+	levelOrder(root);
+	LL l = tree2LL(root);
+	Node*temp = l.head;
+	while(temp!=NULL){
+		cout<<temp->data<<"-->";
+		temp = temp->right;
 	}
 
-	Pair p = maxSumSubset(root);
-	cout<<max(p.inc,p.exc)<<endl;
+	//root = removeNode(root,5);
+	//root = removeNode(root,4);
+
+
+
+
 	return 0;
 }
