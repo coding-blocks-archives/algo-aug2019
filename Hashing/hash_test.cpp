@@ -11,7 +11,22 @@ int main(){
 	h.insert("litchi",20);
 	h.insert("kiwi",10);
 
+	int * price = h.search("banana");
+	if(price==NULL){
+		cout<<"banana not found";
+	}
+	else{
+		cout<<"Banana costs "<<*price<<endl;
+	}
+
 	h.print();
 
-
+	cout<<"Insert";
+	h["Pineapple"] = 120;
+	cout<<h["Pineapple"];
+	cout<<"Update";
+	h["Pineapple"] = 80;
+	cout<<h["Pineapple"];
+	
+	return 0;
 }

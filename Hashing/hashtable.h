@@ -102,11 +102,34 @@ public:
 			cout<<endl;
 		}
 	}
-	void search(string key){
-
-			
+	T* search(string key){
+		int idx = hashfn(key);
+		Node<T>*temp = table[idx];
+		while(temp!=NULL){
+			if(temp->key==key){
+				return &temp->value;
+			}
+			temp = temp->next;
+		}
+		return NULL; //otherwise
+	}
+	void erase(string key){
+		//Delete that node containing key,val pair
+		// Delete from LL
+		//Homework
 
 	}
+	//Operator Overloading
+	T& operator[](string key){
+		T* p = search(key);
+		if(p==NULL){
+			T garbage;
+			insert(key,garbage);
+			p = search(key);
+		}
+		return *p;
+	}
+
 
 };
 
